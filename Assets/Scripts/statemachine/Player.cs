@@ -1,0 +1,51 @@
+using UnityEngine;
+
+public class Player : MonoBehaviour
+{
+    public InputHandler inputHandler;
+    public enum PositionState { 
+        Grounded, 
+        Air
+    }
+
+    private IPlayerState currentState;
+    
+    // Exposed so states can easily return them in CheckSwitchStates()
+    public IdleState IdleState { get; private set; } 
+    public MoveState MoveState { get; private set; }
+
+    private void Awake()
+    {
+        inputHandler=GetComponent<InputHandler>();
+
+        // CONTEXT INJECTION: We pass 'this' to the states so they know who they belong to
+        IdleState = new IdleState(this);
+        MoveState = new MoveState(this);
+
+        currentState = IdleState;
+        currentState.EnterState();
+    }
+
+    private void Update()
+    {
+        GroundCheck();
+        
+        SwitchStates(currentState.CheckSwitchStates());
+        currentState.UpdateState();
+        Debug.Log(currentState);
+    }
+
+    private void SwitchStates(IPlayerState newState)
+    {
+        if (newState == null || newState == currentState) return; 
+        
+        currentState.ExitState();
+        newState.EnterState();
+        currentState = newState;
+    }
+
+    private void GroundCheck()
+    {
+        // Implementation...
+    }
+}

@@ -89,6 +89,8 @@ namespace KinematicCharacterController.Examples
         private Vector3 lastInnerNormal = Vector3.zero;
         private Vector3 lastOuterNormal = Vector3.zero;
 
+        public LineRenderer aaaa;
+
         private void Awake()
         {
             // Handle initial state
@@ -96,6 +98,15 @@ namespace KinematicCharacterController.Examples
 
             // Assign the characterController to the motor
             Motor.CharacterController = this;
+        }
+        void Start()
+        {
+            aaaa=GetComponent<LineRenderer>();
+        }
+        void Update()
+        {
+            
+            
         }
 
         /// <summary>
@@ -309,7 +320,8 @@ namespace KinematicCharacterController.Examples
                             if (_moveInputVector.sqrMagnitude > 0f)
                             {
                                 Vector3 addedVelocity = _moveInputVector * AirAccelerationSpeed * deltaTime;
-
+                                        aaaa.SetPosition(0,addedVelocity-transform.position);
+                                        aaaa.SetPosition(1,transform.position);
                                 Vector3 currentVelocityOnInputsPlane = Vector3.ProjectOnPlane(currentVelocity, Motor.CharacterUp);
 
                                 // Limit air velocity from inputs
@@ -325,6 +337,7 @@ namespace KinematicCharacterController.Examples
                                     if (Vector3.Dot(currentVelocityOnInputsPlane, addedVelocity) > 0f)
                                     {
                                         addedVelocity = Vector3.ProjectOnPlane(addedVelocity, currentVelocityOnInputsPlane.normalized);
+
                                     }
                                 }
 
