@@ -1,15 +1,15 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-public class IdleState : IPlayerState
+public class JumpState : IPlayerState
 {
     // The state requires the Player context upon creation
     private Player player;
-    public IdleState(Player playerContext){player = playerContext;}
+    public JumpState(Player playerContext){player = playerContext;}
 
     public void EnterState()
     {
-        
+        //add upwards force
     }
     public void UpdateState()
     {
@@ -21,8 +21,7 @@ public class IdleState : IPlayerState
     }
     public IPlayerState CheckSwitchStates()
     {
-        if(player.inputHandler.inputBuffer.Jump) return player.JumpState;
-        if(player.inputHandler.inputBuffer.Move.sqrMagnitude>0) return player.MoveState;
+        if(player.positionState==0) return player.IdleState;
         return null;
     }
 }
