@@ -12,6 +12,14 @@ public class Player : MonoBehaviour
     }
     public PositionState positionState=new PositionState();
 
+    public enum OrientationMethod
+    {
+        None,
+        TowardsGravity,
+        TowardsGroundSlopeAndGravity,
+    }
+    public OrientationMethod orientationMethod=new OrientationMethod();
+
     private IPlayerState currentState;
     
     // Exposed so states can easily return them in CheckSwitchStates()
@@ -53,10 +61,14 @@ public class Player : MonoBehaviour
 
     private void GroundCheck()
     {
-        // Implementation...
+        // Implement coyote jumps
         if (characterMotor.GroundingStatus.IsStableOnGround)
         {
-            positionState=0;
+            positionState=PositionState.Grounded;
+        }
+        else
+        {
+            positionState=PositionState.Air;
         }
     }
 }
