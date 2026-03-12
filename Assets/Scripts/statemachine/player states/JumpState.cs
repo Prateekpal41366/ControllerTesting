@@ -20,7 +20,7 @@ public class JumpState : IPlayerState
         Vector3 target =Vector3.ProjectOnPlane(
             player.inputHandler.inputBuffer.camAlignedMove,
             Vector3.up
-        )*player.stats.strafeSpeed;
+        )*player.stats.airSpeed;
         target.y=player.kinematicPhysics.velocity.y;
 
         //lerping

@@ -17,12 +17,12 @@ public class FallState : IPlayerState
         Vector3 target =Vector3.ProjectOnPlane(
             player.inputHandler.inputBuffer.camAlignedMove,
             Vector3.up
-        )*player.stats.strafeSpeed;
+        )*player.stats.airSpeed;
         target.y=player.kinematicPhysics.velocity.y;
 
         //lerping
         Vector3 vel=player.kinematicPhysics.velocity;
-        vel=Vector3.MoveTowards(vel,target,250*Time.fixedDeltaTime);
+        vel=Vector3.MoveTowards(vel,target,100*Time.fixedDeltaTime);
         //applying
         player.kinematicPhysics.velocity=new Vector3(vel.x,player.kinematicPhysics.velocity.y,vel.z);
 
@@ -34,6 +34,10 @@ public class FallState : IPlayerState
     }
     public IPlayerState CheckSwitchStates()
     {   
+        if (Time.time - player.inputHandler.inputBuffer.Dash <= 0.2f)
+        {
+            return player.DashState;
+        }
         if (player.kinematicPhysics.grounded)
         {
             if (player.inputHandler.inputBuffer.Move.sqrMagnitude<math.EPSILON) return player.IdleState;

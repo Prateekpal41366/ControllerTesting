@@ -18,18 +18,20 @@ public class Player : MonoBehaviour
     public MoveState MoveState { get; private set; }
     public JumpState JumpState { get; private set; }
     public FallState FallState { get; private set; }
+    public DashState DashState { get; private set; }
 
     private void Awake()
     {
         inputHandler=GetComponent<InputHandler>();
         kinematicPhysics=GetComponent<KinematicPhysics>();
-        animator=GetComponentInChildren<Animator>();
+     //   animator=GetComponentInChildren<Animator>();
 
         // instantiate state and context injection
         IdleState = new IdleState(this);
         MoveState = new MoveState(this);
         JumpState=new JumpState(this);
         FallState=new FallState(this);
+        DashState=new DashState(this);
 
         currentState = IdleState;
         currentState.EnterState();
@@ -40,7 +42,7 @@ public class Player : MonoBehaviour
         SwitchStates(currentState.CheckSwitchStates());
         currentState.UpdateState();
         RotateCharacter();
-      //  Debug.Log(currentState);
+        Debug.Log(currentState);
     }
 
     private void SwitchStates(IPlayerState newState)

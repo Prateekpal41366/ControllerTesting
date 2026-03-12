@@ -36,6 +36,7 @@ public class MoveState : IPlayerState
     {
         if (player.inputHandler.inputBuffer.Move.sqrMagnitude<math.EPSILON) return player.IdleState;
         if (Time.time-player.inputHandler.inputBuffer.Jump<=0.2 && player.kinematicPhysics.grounded) {return player.JumpState;}
+        if (Time.time - player.inputHandler.inputBuffer.Dash <= 0.2f) return player.DashState;
         if (!player.kinematicPhysics.grounded) return player.FallState;
         return null;
     }

@@ -19,7 +19,8 @@ public class KinematicPhysics : MonoBehaviour
     public float groundSlopeAngle{get; private set;}
     public Vector3 groundSlopeNormal {get; private set;}
 
-    public bool wallRunning=false;
+    public bool wallStick=false;
+    public bool dashing=false;
 
     //other stuff only for use here
     private SphereCollider sphereCollider;
@@ -46,7 +47,7 @@ public class KinematicPhysics : MonoBehaviour
             float distance = remainingMovement.magnitude;
             if (distance < 0.001f) break;
 
-            if (Physics.SphereCast(sphereCollider.center,sphereCollider.radius,remainingMovement.normalized,out RaycastHit hit, distance + skinWidth, collisionLayers))
+            if (Physics.SphereCast(transform.TransformPoint(sphereCollider.center),sphereCollider.radius,remainingMovement.normalized,out RaycastHit hit, distance + skinWidth, collisionLayers))
             {
                 // Move up to the hit
                 float castDistance = Mathf.Max(0, hit.distance - skinWidth);
@@ -84,7 +85,7 @@ public class KinematicPhysics : MonoBehaviour
         // Start the cast from slightly above the bottom sphere (p2)
         // This gives the SphereCast space to actually "hit" the floor 
         // even if we are flush against it.
-        Vector3 castOrigin = sphereCollider.center + transform.up * 0.1f; 
+        Vector3 castOrigin = transform.TransformPoint(sphereCollider.center) + transform.up * 0.1f; 
         float castDistance = 0.1f + skinWidth + 0.05f; // Extra padding
 
         bool Rayhit = Physics.SphereCast(

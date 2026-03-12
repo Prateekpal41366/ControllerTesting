@@ -26,9 +26,13 @@ public class IdleState : IPlayerState
     public IPlayerState CheckSwitchStates()
     {
         if (player.inputHandler.inputBuffer.Move.sqrMagnitude>0) return player.MoveState;
-        if (Time.time-player.inputHandler.inputBuffer.Jump<=0.2 && player.kinematicPhysics.grounded) 
+        if (Time.time-player.inputHandler.inputBuffer.Jump<=0.2 && player.kinematicPhysics.grounded)
         {
             return player.JumpState;
+        }
+        if (Time.time - player.inputHandler.inputBuffer.Dash <= 0.2f)
+        {
+            return player.DashState;
         }
         if (!player.kinematicPhysics.grounded) return player.FallState;
         return null;
