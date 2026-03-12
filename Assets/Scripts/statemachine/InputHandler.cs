@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,13 +10,6 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private InputActionReference mouseInput;
     [SerializeField] private InputActionReference jumpInput;
     [SerializeField] private InputActionReference dashInput;
-
-    //buffer setting and variables
-    [Header("Input Settings")]
-    [SerializeField] private float jumpBufferTime = 0.2f;
-    [SerializeField] private float dashBufferTime = 0.15f;
-    private float jumpBuffer=0;
-    private float dashBuffer=0;
 
     //enabling input actions
     private void OnEnable()
@@ -40,9 +34,12 @@ public class InputHandler : MonoBehaviour
     {
         public Vector2 Move;
         public Vector2 Mouse;
-        public bool Jump;
+        public Vector3 camAlignedMove;
+        public Vector3 camForward;
+        public Vector3 camUp;
+        public float Jump;
         public bool JumpHold;
-        public bool Dash;
+        public float Dash;
         public bool DashHold;
     }
     public InputBuffer inputBuffer=new InputBuffer();
@@ -50,21 +47,34 @@ public class InputHandler : MonoBehaviour
     //updating values
     private void UpdateInputBuffer()
     {
+        //wasd and mouse
         inputBuffer.Move=moveInput.action.ReadValue<Vector2>();
         inputBuffer.Mouse=mouseInput.action.ReadValue<Vector2>();
 
-        // Handle Jump Timing (Buffer)
-        if (jumpInput.action.WasPressedThisFrame()) jumpBuffer = Time.time;
-        // Is the jump still within the valid window?
-        inputBuffer.Jump = (Time.time - jumpBuffer) <= jumpBufferTime;
-
+        //buffer times
+        //jump
+        if (jumpInput.action.WasPressedThisFrame()) inputBuffer.Jump = Time.time;
         inputBuffer.JumpHold=jumpInput.action.IsPressed();
 
         //dash
-        if (dashInput.action.WasPressedThisFrame()) dashBuffer = Time.time;
-        inputBuffer.Dash = (Time.time - dashBuffer) <= dashBufferTime;
-
+        if (dashInput.action.WasPressedThisFrame()) inputBuffer.Dash = Time.time;
         inputBuffer.DashHold=dashInput.action.IsPressed();
+
+        AlignMoveToCam();
+    }
+
+    private void AlignMoveToCam()
+    {
+        Vector3 camRight=Vector3.Cross(inputBuffer.camForward,inputBuffer.camUp);
+        inputBuffer.camAlignedMove=(inputBuffer.camForward*inputBuffer.Move.y+
+            camRight*-inputBuffer.Move.x).normalized;
+    }
+
+    void Start()
+    {
+        //prevents actions on start
+        inputBuffer.Jump=-10f;
+        inputBuffer.Dash=-10f;
     }
 
     void Update()

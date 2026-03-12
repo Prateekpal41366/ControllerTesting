@@ -1,12 +1,12 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-public class MoveState : IPlayerState
+public class FallState : IPlayerState
 {
     // The state requires the Player context upon creation
     private Player player;
-    public MoveState(Player playerContext){player = playerContext;}
-    
+    public FallState(Player playerContext){player = playerContext;}
+
     public void EnterState()
     {
         
@@ -16,8 +16,8 @@ public class MoveState : IPlayerState
         // combine input with speed and projection
         Vector3 target =Vector3.ProjectOnPlane(
             player.inputHandler.inputBuffer.camAlignedMove,
-            player.kinematicPhysics.groundSlopeNormal
-        )*player.stats.moveSpeed;
+            Vector3.up
+        )*player.stats.strafeSpeed;
         target.y=player.kinematicPhysics.velocity.y;
 
         //lerping
@@ -33,10 +33,12 @@ public class MoveState : IPlayerState
         
     }
     public IPlayerState CheckSwitchStates()
-    {
-        if (player.inputHandler.inputBuffer.Move.sqrMagnitude<math.EPSILON) return player.IdleState;
-        if (Time.time-player.inputHandler.inputBuffer.Jump<=0.2 && player.kinematicPhysics.grounded) {return player.JumpState;}
-        if (!player.kinematicPhysics.grounded) return player.FallState;
+    {   
+        if (player.kinematicPhysics.grounded)
+        {
+            if (player.inputHandler.inputBuffer.Move.sqrMagnitude<math.EPSILON) return player.IdleState;
+            if(player.inputHandler.inputBuffer.Move.sqrMagnitude>0) return player.MoveState;
+        }
         return null;
     }
 
@@ -45,12 +47,12 @@ public class MoveState : IPlayerState
         Vector3 target=Vector3.ProjectOnPlane
         (
             player.inputHandler.inputBuffer.camAlignedMove,
-            player.kinematicPhysics.groundSlopeNormal
+            Vector3.up
         );
         player.targetLookDirection = Quaternion.LookRotation
         (
             target,
-            player.kinematicPhysics.groundSlopeNormal
+            Vector3.up
         );
     }
 }

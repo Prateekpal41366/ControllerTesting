@@ -1,55 +1,46 @@
-using System;
-using KinematicCharacterController;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] public Vector3 Velocity=Vector3.zero;
-    [SerializeField] private Vector3 Gravity=Vector3.down*10f;
-
+    //refrences to scripts
     public InputHandler inputHandler;
-    public enum PositionState { 
-        Grounded, 
-        Air,
-        water,
-    }
-    public PositionState positionState=new PositionState();
+    public KinematicPhysics kinematicPhysics;
+    public PlayerStats stats;
+    public Animator animator;
 
-    public enum OrientationMethod
-    {
-        None,
-        TowardsGravity,
-        TowardsGroundSlopeAndGravity,
-    }
-    public OrientationMethod orientationMethod=new OrientationMethod();
+    //variables
+    public Quaternion targetLookDirection;
 
+    //state instances
     private IPlayerState currentState;
-    
     // Exposed so states can easily return them in CheckSwitchStates()
     public IdleState IdleState { get; private set; } 
     public MoveState MoveState { get; private set; }
     public JumpState JumpState { get; private set; }
+    public FallState FallState { get; private set; }
 
     private void Awake()
     {
         inputHandler=GetComponent<InputHandler>();
+        kinematicPhysics=GetComponent<KinematicPhysics>();
+        animator=GetComponentInChildren<Animator>();
 
-        // creating state instances
+        // instantiate state and context injection
         IdleState = new IdleState(this);
         MoveState = new MoveState(this);
-        JumpState = new JumpState(this);
+        JumpState=new JumpState(this);
+        FallState=new FallState(this);
 
         currentState = IdleState;
         currentState.EnterState();
     }
 
     private void Update()
-    {
-        GroundCheck();
-        
+    {        
         SwitchStates(currentState.CheckSwitchStates());
         currentState.UpdateState();
-        Debug.Log(positionState);
+        RotateCharacter();
+      //  Debug.Log(currentState);
     }
 
     private void SwitchStates(IPlayerState newState)
@@ -61,48 +52,15 @@ public class Player : MonoBehaviour
         currentState = newState;
     }
 
-    [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private LayerMask waterLayer;
-
-    private void GroundCheck()
+    private void RotateCharacter()
     {
-
-        // Implement coyote jumps
-        RaycastHit hit;
-        bool hasHit = Physics.SphereCast(
-            transform.position,
-            0.3f,
-            Vector3.down,
-            out hit,
-            0.5f
+        if (targetLookDirection==null) return;
+        // Smoothly interpolate to the target
+        // We use a high multiplier if we want "snappy" transitions between modes
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation, 
+            targetLookDirection, 
+            10f * Time.deltaTime
         );
-
-        if (!hasHit)
-        {
-            positionState=PositionState.Air;
-            return;
-        }
-        int hitLayer=hit.collider.gameObject.layer;
-        if((groundLayer&(1<<hitLayer))!=0) 
-        {
-            positionState=PositionState.Grounded;
-            return;
-        }
-        if((waterLayer&(1<<hitLayer))!=0) 
-        {
-            positionState=PositionState.water;
-            return;
-        }
-    }
-
-    void FixedUpdate()
-    {
-        UpdateVelocity();
-    }
-
-    private void UpdateVelocity()
-    {
-       // Velocity+=Gravity;
-        transform.position+=Velocity*Time.fixedDeltaTime;
     }
 }
