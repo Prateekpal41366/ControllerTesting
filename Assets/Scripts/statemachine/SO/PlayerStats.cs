@@ -10,7 +10,6 @@ public class PlayerStats : ScriptableObject
     public float airDrag=0.2f;
     public float dashStr=20f;
     public float jumpStr = 15f;
-    public float flapStr=10f;
 
     //maybe
 

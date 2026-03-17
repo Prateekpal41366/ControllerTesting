@@ -114,9 +114,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KinematicPhysics
   velocity: {x: 0, y: 0, z: 0}
+  terminalVelocity: 50
   gravity: {x: 0, y: -20, z: 0}
   skinWidth: 0.02
-  MaxSlopeAngle: 80
+  MaxSlopeAngle: 50
   collisionLayers:
     serializedVersion: 2
     m_Bits: 9
@@ -126,7 +127,8 @@ MonoBehaviour:
   waterLayer:
     serializedVersion: 2
     m_Bits: 16
-  wallRunning: 0
+  wallStick: 0
+  dashing: 0
 --- !u!135 &5812372732425321954
 SphereCollider:
   m_ObjectHideFlags: 0

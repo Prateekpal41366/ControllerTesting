@@ -13,6 +13,7 @@ public class DashState : IPlayerState
     {
         _dashDuration=Time.time;
         Vector3 target=Vector3.ProjectOnPlane(player.inputHandler.inputBuffer.camAlignedMove,Vector3.up).normalized;
+        if (target.magnitude < 0.1f) target = player.transform.forward; // default to facing direction
         player.kinematicPhysics.velocity+=target*player.stats.dashStr;
         CharacterRotation();
     }

@@ -5,6 +5,7 @@ public class KinematicPhysics : MonoBehaviour
 {
     [Header("Settings")]
     public Vector3 velocity;
+    [SerializeField] private float terminalVelocity=50f;
     [SerializeField] private Vector3 gravity=Vector3.down*20f;
     [SerializeField] private float skinWidth = 0.02f;
     [SerializeField] private float MaxSlopeAngle=80f;
@@ -24,7 +25,7 @@ public class KinematicPhysics : MonoBehaviour
 
     //other stuff only for use here
     private SphereCollider sphereCollider;
-    private const int MaxBounces=3;
+    private const int MaxBounces=8;
 
     void Awake()
     {
@@ -53,8 +54,15 @@ public class KinematicPhysics : MonoBehaviour
                 float castDistance = Mathf.Max(0, hit.distance - skinWidth);
                 transform.position += remainingMovement.normalized * castDistance;
 
+                //
+                Vector3 slidePlaneNormal=hit.normal;
+                if (Vector3.Angle(slidePlaneNormal,Vector3.up)>=MaxSlopeAngle)
+                {
+                    slidePlaneNormal=Vector3.ProjectOnPlane(hit.normal,Vector3.up).normalized;
+                }
+
                 // Calculate slide vector
-                remainingMovement = Vector3.ProjectOnPlane(remainingMovement.normalized * (distance - castDistance), hit.normal);
+                remainingMovement = Vector3.ProjectOnPlane(remainingMovement.normalized * (distance - castDistance), slidePlaneNormal);
                 
                 // Also project velocity so we don't keep pushing into the wall
                 velocity = Vector3.ProjectOnPlane(velocity, hit.normal);
@@ -71,12 +79,16 @@ public class KinematicPhysics : MonoBehaviour
     {
         if (!grounded)
         {
-            velocity += gravity * Time.fixedDeltaTime;
+            if(velocity.sqrMagnitude<=terminalVelocity*terminalVelocity)
+            {
+                velocity += gravity * Time.fixedDeltaTime;
+            }
         }
         else if (velocity.y < 0)
         {
             // Small snap-to-ground force
-            velocity.y = -2f;
+            //velocity.y = -2f;
+            velocity+=groundSlopeNormal*-2f;
         }
     }
 
@@ -118,5 +130,15 @@ public class KinematicPhysics : MonoBehaviour
             return;
         }
         //if ((waterLayer & mask) != 0) check water
+    }
+
+    private void ApplyGroundSnap()
+    {
+        if (!grounded) return;
+        RaycastHit hit;
+        if (Physics.SphereCast(transform.position + Vector3.up * 0.1f, sphereCollider.radius, Vector3.down, out hit, 0.5f, groundLayer))
+        {
+            transform.position = hit.point + Vector3.up * sphereCollider.radius;
+        }
     }
 }
